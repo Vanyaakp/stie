@@ -1,0 +1,290 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Управление пользователями</title>
+    <link rel="stylesheet" href="{% static 'students/styles.css' %}">
+    <style>
+        .profile-menu {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .profile-avatar-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .profile-avatar-btn:hover {
+            transform: scale(1.1);
+        }
+        .profile-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            overflow: hidden;
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+        }
+        .profile-dropdown.active {
+            display: block;
+        }
+        .profile-dropdown a {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            font-size: 14px;
+        }
+        .profile-dropdown a:hover {
+            background-color: #f5f5f5;
+        }
+        .profile-dropdown a:first-child {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .profile-dropdown-divider {
+            height: 1px;
+            background-color: #eee;
+        }
+        .logout-btn {
+            color: #f44336 !important;
+            font-weight: bold;
+        }
+        .admin-header {
+            background-color: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .admin-header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .admin-badge {
+            display: inline-block;
+            background-color: #c92a2a;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .nav-tabs a, .nav-tabs span {
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px 4px 0 0;
+            color: #666;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .nav-tabs span.active {
+            background-color: #ff6b6b;
+            color: white;
+            border-bottom: 2px solid #ff6b6b;
+            margin-bottom: -12px;
+        }
+        .nav-tabs a:hover {
+            background-color: #f0f0f0;
+        }
+        .user-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        .user-info {
+            flex: 1;
+        }
+        .user-info strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .user-info small {
+            display: block;
+            color: #666;
+            margin: 2px 0;
+        }
+        .user-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        .user-badge.admin {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        .user-badge.user {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .user-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .user-actions a, .user-actions button {
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+        .users-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="page-students">
+    <div class="top-menu">
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'student_list' %}">📚 Студенты</a>
+            {% if is_admin %}
+                <a href="{% url 'admin_panel' %}" style="background-color: #ff6b6b; padding: 8px 16px; border-radius: 4px; color: white; text-decoration: none;">🔐 Админ-панель</a>
+            {% endif %}
+            
+            <div style="margin-left: auto;">
+                <div class="profile-menu" id="profileMenu">
+                    <div class="profile-avatar-btn" id="profileBtn" style="background-image: url('{{ request.user.profile.get_avatar_url }}');"></div>
+                    <span style="color: #333; font-weight: 500;">{{ request.user.username }}</span>
+                    
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="{% url 'profile' %}">👤 Редактировать профиль</a>
+                        <a href="{% url 'change_password' %}">🔐 Изменить пароль</a>
+                        <div class="profile-dropdown-divider"></div>
+                        <a href="{% url 'logout' %}" class="logout-btn">🚪 Выйти</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <a href="{% url 'login' %}">Войти</a>
+            <a href="{% url 'register' %}">Регистрация</a>
+        {% endif %}
+    </div>
+    
+    <div class="admin-header">
+        <h1>🔐 Админ-панель</h1>
+        <p>Управление студентами, группами, клубами и пользователями</p>
+    </div>
+    
+    <div class="container">
+        <div class="nav-tabs">
+            <a href="{% url 'admin_panel' %}">📚 Студенты</a>
+            <span class="active">👥 Пользователи</span>
+        </div>
+
+        <div class="form-card">
+            <div class="editor-title">Добавить нового пользователя</div>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                {{ form.as_p }}
+                <button type="submit" style="background-color: #4CAF50;">Создать пользователя</button>
+            </form>
+        </div>
+
+        <div class="students-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Пользователи в системе ({{ users.count }})</h2>
+            </div>
+            <ul class="users-list">
+                {% for user in users %}
+                    <li>
+                        <div class="user-card">
+                            <div class="user-info">
+                                <strong>
+                                    <a href="{% url 'user_profile' user.username %}" style="color: #333; text-decoration: none;">
+                                        {{ user.username }}
+                                    </a>
+                                    {% if user.is_staff %}
+                                        <span class="user-badge admin">АДМИН</span>
+                                    {% else %}
+                                        <span class="user-badge user">USER</span>
+                                    {% endif %}
+                                </strong>
+                                <small>📧 Email: {{ user.email|default:"Не указан" }}</small>
+                                <small>👤 ФИО: {{ user.first_name }} {{ user.last_name|default:"Не указано" }}</small>
+                                <small>📅 Дата присоединения: {{ user.date_joined|date:"d.m.Y H:i" }}</small>
+                            </div>
+                            <div class="user-actions">
+                                <a href="{% url 'user_profile' user.username %}" style="background-color: #2196F3; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none;">Профиль</a>
+                                {% if user.id != request.user.id %}
+                                    <form method="POST" action="{% url 'delete_user' user.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="delete-btn" onclick="return confirm('Вы уверены, что хотите удалить этого пользователя?');">Удалить</button>
+                                    </form>
+                                {% else %}
+                                    <span style="color: #999; font-size: 14px;">Это ваш аккаунт</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li style="text-align: center; padding: 20px; color: #999;">
+                        Нет пользователей в системе.
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Выпадающее меню профиля
+        const profileBtn = document.getElementById('profileBtn');
+        const profileMenu = document.getElementById('profileMenu');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        if (profileBtn) {
+            profileBtn.addEventListener('click', function() {
+                profileDropdown.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!profileMenu.contains(e.target)) {
+                    profileDropdown.classList.remove('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

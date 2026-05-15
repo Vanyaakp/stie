@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить студента</title>
+    <link rel="stylesheet" href="{% static 'students/styles.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+        }
+
+        form {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            color: #34495e;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .avatar-preview {
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .avatar-preview .current-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 16px;
+            object-fit: cover;
+            display: block;
+            margin: 10px auto 0;
+            border: 2px solid #34495e;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box; /* Чтобы padding не раздувал ширину */
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #34495e;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #2c3e50;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="page-students">
+
+    <h1>{{ title }}</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if student and student.avatar %}
+            <div class="avatar-preview">
+                <label>Текущий аватар:</label>
+                <img src="{{ student.avatar.url }}" alt="{{ student }}" class="current-avatar">
+            </div>
+        {% endif %}
+        {{ form.as_p }}
+
+        <button type="submit">Сохранить</button>
+    </form>
+
+</body>
+</html>

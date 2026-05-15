@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Удаление пользователя</title>
+    <link rel="stylesheet" href="{% static 'students/styles.css' %}">
+    <style>
+        .confirmation-card {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .confirmation-card h2 {
+            color: #f44336;
+            margin-bottom: 20px;
+        }
+        .confirmation-card p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        .confirmation-card .user-details {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .confirmation-card .user-details strong {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .confirmation-card .user-details p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .confirmation-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .confirmation-actions button,
+        .confirmation-actions a {
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .delete-confirm-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .delete-confirm-btn:hover {
+            background-color: #d32f2f;
+        }
+        .cancel-btn {
+            background-color: #999;
+            color: white;
+        }
+        .cancel-btn:hover {
+            background-color: #777;
+        }
+    </style>
+</head>
+<body class="page-students">
+    <div class="top-menu">
+        {% if request.user.is_authenticated %}
+            <span class="top-greeting">Привет, {{ request.user.username }}!</span>
+            <a href="{% url 'logout' %}">Выйти</a>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <div class="confirmation-card">
+            <h2>⚠️ Удаление пользователя</h2>
+            <p>Вы действительно хотите удалить этого пользователя?</p>
+            
+            <div class="user-details">
+                <strong>{{ user.username }}</strong>
+                <p><strong>Email:</strong> {{ user.email|default:"Не указан" }}</p>
+                <p><strong>ФИО:</strong> {{ user.first_name }} {{ user.last_name|default:"Не указано" }}</p>
+                <p><strong>Дата присоединения:</strong> {{ user.date_joined|date:"d.m.Y H:i" }}</p>
+            </div>
+
+            <p style="color: #f44336; font-weight: bold;">⚠️ Это действие необратимо!</p>
+
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <div class="confirmation-actions">
+                    <button type="submit" class="delete-confirm-btn">Удалить пользователя</button>
+                    <a href="{% url 'admin_users' %}" class="cancel-btn">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <link rel="stylesheet" href="{% static 'students/styles.css' %}">
+</head>
+<body class="page-auth">
+<div class="card auth-card">
+    <div class="auth-header">
+        <h2>Вход в аккаунт</h2>
+        <p class="auth-subtitle">Введите данные, чтобы получить доступ к списку студентов.</p>
+    </div>
+    <form method="POST" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Войти</button>
+    </form>
+    <div class="auth-footer">
+        <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a></p>
+    </div>
+</div>
+</body>
+</html>

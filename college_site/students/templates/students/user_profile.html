@@ -1,0 +1,258 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль - {{ profile_user.username }}</title>
+    <link rel="stylesheet" href="{% static 'students/styles.css' %}">
+    <style>
+        .profile-menu {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .profile-avatar-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .profile-avatar-btn:hover {
+            transform: scale(1.1);
+        }
+        .profile-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            overflow: hidden;
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+        }
+        .profile-dropdown.active {
+            display: block;
+        }
+        .profile-dropdown a,
+        .profile-dropdown button {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            font-size: 14px;
+        }
+        .profile-dropdown a:hover,
+        .profile-dropdown button:hover {
+            background-color: #f5f5f5;
+        }
+        .profile-dropdown a:first-child {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .profile-dropdown-divider {
+            height: 1px;
+            background-color: #eee;
+        }
+        .logout-btn {
+            color: #f44336 !important;
+            font-weight: bold;
+        }
+
+        .profile-header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+        }
+        .profile-avatar-display {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            margin: 0 auto 20px;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .profile-header-section h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .profile-header-section p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .profile-content {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .profile-info-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .profile-info-card h2 {
+            margin: 0 0 20px 0;
+            color: #667eea;
+            font-size: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+        .profile-info-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .profile-info-item {
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        .profile-info-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .profile-info-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="page-students">
+    <div class="top-menu">
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'student_list' %}">📚 Студенты</a>
+            {% if is_admin %}
+                <a href="{% url 'admin_panel' %}" style="background-color: #ff6b6b; padding: 8px 16px; border-radius: 4px; color: white; text-decoration: none;">🔐 Админ-панель</a>
+            {% endif %}
+            
+            <div style="margin-left: auto;">
+                <div class="profile-menu" id="profileMenu">
+                    <div class="profile-avatar-btn" id="profileBtn" style="background-image: url('{{ request.user.profile.get_avatar_url }}');"></div>
+                    <span style="color: #333; font-weight: 500;">{{ request.user.username }}</span>
+                    
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="{% url 'profile' %}">👤 Редактировать профиль</a>
+                        <a href="{% url 'change_password' %}">🔐 Изменить пароль</a>
+                        <div class="profile-dropdown-divider"></div>
+                        <a href="{% url 'logout' %}" class="logout-btn">🚪 Выйти</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="profile-header-section">
+        <div class="profile-avatar-display" style="background-image: url('{{ user_profile.get_avatar_url }}');"></div>
+        <h1>{{ profile_user.first_name|default:profile_user.username }} {{ profile_user.last_name }}</h1>
+        <p>@{{ profile_user.username }}</p>
+        {% if profile_user.is_staff %}
+            <p style="margin-top: 10px;">
+                <span style="background-color: rgba(255,255,255,0.3); padding: 5px 12px; border-radius: 20px; font-size: 14px;">🔐 АДМИНИСТРАТОР</span>
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="profile-content">
+        <a href="{% url 'student_list' %}" class="back-link">← Вернуться к студентам</a>
+
+        <!-- Информация о пользователе -->
+        <div class="profile-info-card">
+            <h2>ℹ️ Информация об аккаунте</h2>
+            
+            {% if profile_user.first_name or profile_user.last_name %}
+                <div class="profile-info-row">
+                    <div class="profile-info-item">
+                        <div class="profile-info-label">Имя</div>
+                        <div class="profile-info-value">{{ profile_user.first_name|default:"Не указано" }}</div>
+                    </div>
+                    <div class="profile-info-item">
+                        <div class="profile-info-label">Фамилия</div>
+                        <div class="profile-info-value">{{ profile_user.last_name|default:"Не указано" }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="profile-info-row">
+                <div class="profile-info-item">
+                    <div class="profile-info-label">Email</div>
+                    <div class="profile-info-value">{{ profile_user.email|default:"Не указан" }}</div>
+                </div>
+                <div class="profile-info-item">
+                    <div class="profile-info-label">Имя пользователя</div>
+                    <div class="profile-info-value">@{{ profile_user.username }}</div>
+                </div>
+            </div>
+
+            <div class="profile-info-row">
+                <div class="profile-info-item">
+                    <div class="profile-info-label">Дата присоединения</div>
+                    <div class="profile-info-value">{{ profile_user.date_joined|date:"d.m.Y" }}</div>
+                </div>
+                <div class="profile-info-item">
+                    <div class="profile-info-label">Статус</div>
+                    <div class="profile-info-value">
+                        {% if profile_user.is_staff %}
+                            🔐 Администратор
+                        {% else %}
+                            👤 Пользователь
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Выпадающее меню профиля
+        const profileBtn = document.getElementById('profileBtn');
+        const profileMenu = document.getElementById('profileMenu');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        if (profileBtn) {
+            profileBtn.addEventListener('click', function() {
+                profileDropdown.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!profileMenu.contains(e.target)) {
+                    profileDropdown.classList.remove('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
